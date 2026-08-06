@@ -42,9 +42,8 @@ traces/64k_400_90kv_agent_new_noschedule_short_15perc.jsonl
   -> ../../../kimi-k2.6/perf/traces/64k_400_90kv_agent_new_noschedule_short_15perc.jsonl
 ```
 
-The default 15% trace contains 3,541 requests. The numbers in the recipe
-[README](../README.md) use its first 1,500 requests, matching the FP8 recipe so the two
-variants are comparable:
+The default 15% trace contains 3,541 requests. Take its first 1,500 to match the
+[perf table](../README.md) and the FP8 variant:
 
 ```bash
 head -1500 traces/64k_400_90kv_agent_new_noschedule_short_15perc.jsonl > mooncake_1500.jsonl
