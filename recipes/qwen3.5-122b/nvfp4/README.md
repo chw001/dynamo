@@ -110,14 +110,16 @@ sweep, and fetching artifacts.
 
 ## Performance results
 
-Measured on B200 against the **real** 15% agentic mooncake trace (closed-loop
-concurrency; SLA = P50 TTFT < 5 s **and** ≥ 50 output tok/s/user). Headline metric
-is system output tok/s per GPU at the best SLA-passing concurrency.
+Measured 2026-08-05 on the first 1,500 requests of the 15% agentic Mooncake trace (see
+[perf/README.md](perf/README.md)), block size 512, closed-loop, both profiles on the same
+trace. SLA: P50 TTFT < 5 s and P50 output >= 50 tok/s/user. Per-GPU = system throughput /
+GPUs. Both profiles are reported at the concurrency where P50 user tok/s sits just above
+the 50 floor. Aggregated runs `replicas: 2`.
 
-| Recipe                    | GPUs | tok/s/GPU @ SLA | user tok/s (P50) | TTFT (P50) |
-| ------------------------- | ---- | --------------- | ---------------- | ---------- |
-| Aggregated TP1            | 1    | ~1,067          | 80               | 0.6 s      |
-| Disaggregated 1P2D+seq128 | 3    | ~1,112          | 62               | 2.9 s      |
+| config (shipped) | GPUs | conc | tok/s/GPU | tok/s/user | TTFT (P50) | note |
+| ---------------- | ---- | ---- | --------- | ---------- | ---------- | ---- |
+| **aggregated** — 2x TP1 | 2 | c56 | **1205.9** | 50.35 | 367 ms | at the 50 tok/s/user floor |
+| disaggregated — 1P2D | 3 | c60 | 889.9 | 51.69 | 1756 ms | at the 50 tok/s/user floor |
 
 ## Limitations
 
