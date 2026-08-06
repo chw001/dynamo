@@ -110,7 +110,7 @@ sweep, and fetching artifacts.
 
 ## Performance results
 
-Measured 2026-08-05 on the first 1,500 requests of the 15% agentic Mooncake trace (see
+Measured 2026-08-05 on the first 1,500 requests of the agentic Mooncake trace (see
 [perf/README.md](perf/README.md)), block size 512, closed-loop, both profiles on the same
 trace. SLA: P50 TTFT < 5 s and P50 output >= 50 tok/s/user. Per-GPU = system throughput /
 GPUs. Both profiles are reported at the concurrency where P50 user tok/s sits just above
