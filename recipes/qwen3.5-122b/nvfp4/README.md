@@ -108,21 +108,24 @@ sweep, and fetching artifacts.
 | -------- | ---------- | ---------- | ----------------- | ----------------- |
 | Agentic  | 64k        | 400        | 90%               | 50                |
 
-## Performance results
+## Benchmark Results
 
-Measured 2026-08-05 on the first 1,500 requests of the agentic Mooncake trace (see
+Measured 2026-08-06 on the 3,541-request agentic Mooncake trace (see
 [perf/README.md](perf/README.md)), block size 512, closed-loop, both profiles on the same
-trace. SLA: P50 TTFT < 5 s and P50 output >= 50 tok/s/user. Per-GPU = system throughput /
-GPUs. Both profiles are reported at the concurrency where P50 user tok/s sits just above
-the 50 floor. Aggregated runs `replicas: 2`.
+trace. SLA: P50 TTFT < 5 s and P50 output >= 50 tok/s/user; both profiles are reported at
+the concurrency where P50 user tok/s sits just above the floor. `System output tok/s/GPU`
+is system throughput / GPUs. Aggregated runs `replicas: 2`.
 
-| config (shipped) | GPUs | conc | tok/s/GPU | tok/s/user | TTFT (P50) | note |
-| ---------------- | ---- | ---- | --------- | ---------- | ---------- | ---- |
-| **aggregated** — 2x TP1 | 2 | c56 | **1205.9** | 50.35 | 367 ms | at the 50 tok/s/user floor |
-| disaggregated — 1P2D | 3 | c60 | 889.9 | 51.69 | 1756 ms | at the 50 tok/s/user floor |
+| Recipe | GPU | Topology | Workload | MTP | Concurrency | User output tok/s | TTFT (P50) | System output tok/s/GPU |
+|--------|-----|----------|----------|-----|-------------|-------------------|------------|-------------------------|
+| `vllm/agg-b200-agentic/deploy.yaml` | B200 | AGG (2x TP1) | agentic | no | 50 | 52.4 | 246 ms | 1173.2 |
+| `vllm/disagg-b200-agentic/deploy.yaml` | B200 | 1P2D | agentic | no | 60 | 51.4 | 1353 ms | 916.6 |
 
 ## Limitations
 
+- **Disaggregated decode requires `--no-async-scheduling` on vLLM < 0.26.0.** Without it
+  the KV-block zeroing kernel races the NIXL RDMA write and silently erases transferred KV.
+  It costs ~7% throughput and can be dropped on a runtime shipping vLLM >= 0.26.0.
 - **Speculative decoding (MTP) + disaggregation is not shipped on this arch.**
   Disaggregation requires `VLLM_SSM_CONV_STATE_LAYOUT=DS` (for NIXL's 3-read Mamba
   conv-state transfer), but MTP + prefix caching forces `mamba_cache_mode='align'`,
