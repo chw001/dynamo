@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Qwen3.5-122B-A10B-NVFP4 Recipes
 
 Recipes for [Qwen3.5-122B-A10B-NVFP4](https://huggingface.co/nvidia/Qwen3.5-122B-A10B-NVFP4),
@@ -14,7 +19,7 @@ Dynamo + vLLM deployment profiles for the agentic workload. This set covers
 | ------------------------ | ------------------------------------------- | -------------------------------------------- |
 | **GPU**                  | 1x B200 per replica, `replicas: 2` (2x)     | 1x B200 prefill + 2x B200 decode (3x total)  |
 | **Mode**                 | Aggregated                                  | Prefill/decode disaggregated (1P2D)          |
-| **Framework**            | vLLM                                        | vLLM                                         |
+| **Framework**            | Dynamo 1.3.0 / vLLM 0.23                    | Dynamo 1.3.0 / vLLM 0.23                     |
 | **Precision**            | NVFP4 + FP8 KV                              | NVFP4 + FP8 KV                               |
 | **Parallelism**          | TP1                                         | TP1 (per worker)                             |
 | **MoE backend**          | FLASHINFER_TRTLLM                           | FLASHINFER_TRTLLM                            |
@@ -33,7 +38,7 @@ Dynamo + vLLM deployment profiles for the agentic workload. This set covers
 ## Prerequisites
 
 1. **Dynamo Platform installed** on the target cluster with DGD CRDs served —
-   see [Kubernetes Deployment Guide](../../docs/kubernetes/README.md).
+   see [Kubernetes Deployment Guide](../../../docs/kubernetes/README.md).
 2. **NGC/nvcr image pull access** — an NGC pull secret named `nvcr-secret`
    attached to the namespace's default service account (the deploy manifests pull
    from `nvcr.io/nvidia/ai-dynamo`).
