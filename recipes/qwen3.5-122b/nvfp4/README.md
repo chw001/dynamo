@@ -12,7 +12,7 @@ Dynamo + vLLM deployment profiles for the agentic workload. This set covers
 
 |                          | B200 aggregated agentic                     | B200 disaggregated agentic                   |
 | ------------------------ | ------------------------------------------- | -------------------------------------------- |
-| **GPU**                  | 1x B200                                     | 1x B200 prefill + 2x B200 decode (3x total)  |
+| **GPU**                  | 1x B200 per replica, `replicas: 2` (2x)     | 1x B200 prefill + 2x B200 decode (3x total)  |
 | **Mode**                 | Aggregated                                  | Prefill/decode disaggregated (1P2D)          |
 | **Framework**            | vLLM                                        | vLLM                                         |
 | **Precision**            | NVFP4 + FP8 KV                              | NVFP4 + FP8 KV                               |
@@ -118,8 +118,8 @@ is system throughput / GPUs. Aggregated runs `replicas: 2`.
 
 | Recipe | GPU | Topology | Workload | MTP | Concurrency | User output tok/s | TTFT (P50) | System output tok/s/GPU |
 |--------|-----|----------|----------|-----|-------------|-------------------|------------|-------------------------|
-| `vllm/agg-b200-agentic/deploy.yaml` | B200 | AGG (2x TP1) | agentic | no | 50 | 52.4 | 246 ms | 1173.2 |
-| `vllm/disagg-b200-agentic/deploy.yaml` | B200 | 1P2D | agentic | no | 60 | 51.4 | 1353 ms | 916.6 |
+| `vllm/agg-b200-agentic/deploy.yaml` | B200 | AGG, 2x TP1 (2 GPU) | agentic | no | 50 | 52.4 | 246 ms | 1173.2 |
+| `vllm/disagg-b200-agentic/deploy.yaml` | B200 | 1P2D (3 GPU) | agentic | no | 60 | 51.4 | 1353 ms | 916.6 |
 
 ## Limitations
 
