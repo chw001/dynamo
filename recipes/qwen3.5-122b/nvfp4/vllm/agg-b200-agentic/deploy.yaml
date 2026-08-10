@@ -8,10 +8,37 @@
 # KV-aware router — each worker publishes KV-cache events (see --kv-events-config)
 # so the router sends each request to the replica that already holds its prefix.
 #
-# NOTE: speculative decoding (MTP) is intentionally NOT enabled. On this hybrid
-# DeltaNet arch, MTP + prefix caching forces mamba_cache_mode='align', whose
-# conv-state copy path crashes under real concurrent traffic (vLLM issue #38898 /
-# PR #40454; NVBug 6442165). Do not add --speculative-config.
+# MTP is enabled and sourced from the ConfigMap below:
+#   - key `speculative-config`           = real MTP (production; ships active).
+#   - key `speculative-config-synthetic` = forced AL=3.120 (measured on B200 NVFP4
+#     against real text), for representative throughput benchmarking on synthetic
+#     traces such as mooncake. Do NOT ship it.
+#
+# MTP requires VLLM_SSM_CONV_STATE_LAYOUT to stay unset on this profile. DS layout
+# exists for NIXL prefill/decode transfer, which aggregation never performs, and it
+# is what makes MTP + prefix caching hit the unimplemented mamba_cache_mode='align'
+# conv-state copy path (vLLM issue #38898 / PR #40454; NVBug 6442165).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qwen35-122b-agg-b200-agentic-config
+  labels:
+    app.kubernetes.io/name: qwen35-122b-agg-b200-agentic
+    app.kubernetes.io/part-of: dynamo
+data:
+  speculative-config: |-
+    {
+      "method": "mtp",
+      "num_speculative_tokens": 3
+    }
+  speculative-config-synthetic: |-
+    {
+      "method": "mtp",
+      "num_speculative_tokens": 3,
+      "rejection_sample_method": "synthetic",
+      "synthetic_acceptance_length": 3.120
+    }
+---
 apiVersion: nvidia.com/v1beta1
 kind: DynamoGraphDeployment
 metadata:
@@ -86,8 +113,11 @@ spec:
                 - --no-disable-hybrid-kv-cache-manager
                 - --enable-prefix-caching
                 - --block-size=64
-                - --max-num-seqs=32
+                # 128 (not 32) so the running batch can absorb MTP's faster decode; at 32 the
+                # two-replica fleet caps at 64 sequences and TTFT collapses past ~c56.
+                - --max-num-seqs=128
                 - --max-num-batched-tokens=16384
+                - --speculative-config=$(SPECULATIVE_CONFIG)
                 - --gpu-memory-utilization=0.9
                 # Publish KV-cache events so the frontend's KV-aware router
                 # (--router-kv-events) routes each request to the replica already
@@ -123,10 +153,15 @@ spec:
                 # Hybrid (DeltaNet linear-attn + MoE + full-attn) SSM cache knobs.
                 - name: VLLM_ALLREDUCE_USE_SYMM_MEM
                   value: "0"
-                - name: VLLM_SSM_CONV_STATE_LAYOUT
-                  value: DS
                 - name: VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE
                   value: "1"
+                # Flip the key to `speculative-config-synthetic` to benchmark on a
+                # synthetic trace; ship `speculative-config`.
+                - name: SPECULATIVE_CONFIG
+                  valueFrom:
+                    configMapKeyRef:
+                      name: qwen35-122b-agg-b200-agentic-config
+                      key: speculative-config
               envFrom:
                 - secretRef:
                     name: hf-token-secret

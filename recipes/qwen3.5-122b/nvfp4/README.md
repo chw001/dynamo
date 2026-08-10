@@ -13,7 +13,7 @@ full attention every 4th layer).
 ## Configurations
 
 Dynamo + vLLM deployment profiles for the agentic workload. This set covers
-**B200**; H200 profiles are tracked as a follow-up.
+**B200**.
 
 |                          | B200 aggregated agentic                     | B200 disaggregated agentic                   |
 | ------------------------ | ------------------------------------------- | -------------------------------------------- |
@@ -25,7 +25,7 @@ Dynamo + vLLM deployment profiles for the agentic workload. This set covers
 | **MoE backend**          | FLASHINFER_TRTLLM                           | FLASHINFER_TRTLLM                            |
 | **KV cache manager**     | Hybrid (DeltaNet SSM + attention)           | Hybrid (DeltaNet SSM + attention)            |
 | **Routing**              | KV-aware (workers publish KV events)        | KV-aware (workers publish KV events)         |
-| **Speculative decoding** | None — see Limitations                      | None — see Limitations                       |
+| **Speculative decoding** | MTP, `num_speculative_tokens=3`             | None — see Limitations                       |
 | **Context length**       | 262,144 (model default)                     | 262,144 (model default)                      |
 | **KV transfer**          | N/A                                         | NIXL/UCX over InfiniBand                     |
 
@@ -38,7 +38,7 @@ Dynamo + vLLM deployment profiles for the agentic workload. This set covers
 ## Prerequisites
 
 1. **Dynamo Platform installed** on the target cluster with DGD CRDs served —
-   see [Kubernetes Deployment Guide](../../../docs/kubernetes/README.md).
+   see [Kubernetes Deployment Guide](../../../docs/fern/pages/kubernetes/getting-started/quickstart.mdx).
 2. **NGC/nvcr image pull access** — an NGC pull secret named `nvcr-secret`
    attached to the namespace's default service account (the deploy manifests pull
    from `nvcr.io/nvidia/ai-dynamo`).
@@ -96,7 +96,7 @@ kubectl wait --for=condition=Complete job/model-download -n ${NAMESPACE} --timeo
 ### 4. Deploy the DGD
 
 ```bash
-SKU=b200 # H200 profiles to follow
+SKU=b200
 MODE=agg # or disagg
 kubectl apply -f vllm/${MODE}-${SKU}-agentic/deploy.yaml -n ${NAMESPACE}
 ```
@@ -123,7 +123,7 @@ is system throughput / GPUs. Aggregated runs `replicas: 2`.
 
 | Recipe | GPU | Topology | Workload | MTP | Concurrency | User output tok/s | TTFT (P50) | System output tok/s/GPU |
 |--------|-----|----------|----------|-----|-------------|-------------------|------------|-------------------------|
-| `vllm/agg-b200-agentic/deploy.yaml` | B200 | AGG, 2x TP1 (2 GPU) | agentic | no | 50 | 52.4 | 246 ms | 1173.2 |
+| `vllm/agg-b200-agentic/deploy.yaml` | B200 | AGG, 2x TP1 (2 GPU) | agentic | yes | 80 | 50.4 | 335 ms | 1806.4 |
 | `vllm/disagg-b200-agentic/deploy.yaml` | B200 | 1P2D (3 GPU) | agentic | no | 60 | 51.4 | 1353 ms | 916.6 |
 
 ## Limitations
@@ -142,12 +142,12 @@ is system throughput / GPUs. Aggregated runs `replicas: 2`.
   quality regression: a spec-decode conv-state metadata mismatch between the prefill
   and decode workers causes the NIXL transfer to misplace the Mamba conv state,
   producing garbage output.
-- **MTP on aggregation** is likewise not shipped. Output is *correct* in isolation
-  (agg + MTP stays coherent even on a forced Mamba prefix-cache hit — the P↔D
-  transfer garbage above cannot occur without disaggregation), but MTP + prefix
-  caching forces `mamba_cache_mode='align'`, whose conv-state copy path crashes
-  under real concurrent long-context traffic — the same align-mode defect as above
-  (vLLM [#38898](https://github.com/vllm-project/vllm/issues/38898) / PR
-  [#40454](https://github.com/vllm-project/vllm/pull/40454); NVBug 6442165). Even
-  with DS unset to sidestep that, MTP-heavy decode starves prefill on the shared
-  GPU (TTFT regressions) for no throughput win.
+- **MTP on aggregation requires `VLLM_SSM_CONV_STATE_LAYOUT` to stay unset.** DS layout
+  exists for NIXL prefill/decode transfer, which aggregation never performs; with DS set,
+  MTP + prefix caching hits the unimplemented `mamba_cache_mode='align'` conv-state copy
+  path (vLLM [#38898](https://github.com/vllm-project/vllm/issues/38898) / PR
+  [#40454](https://github.com/vllm-project/vllm/pull/40454); NVBug 6442165). With DS unset
+  the aggregated profile replays the full 3,541-request agentic trace without an engine
+  restart.
+- **MTP is validated for text only.** The aggregated profile enables `--enable-multimodal`;
+  MTP has not been exercised on the image or video path.
