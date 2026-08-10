@@ -106,7 +106,7 @@ spec:
                 - --no-disable-hybrid-kv-cache-manager
                 - --enable-prefix-caching
                 - --block-size=64
-                # 32 caps the 2-replica fleet at 64 sequences; TTFT collapses past ~c56.
+                # Not 32: that caps the 2-replica fleet at 64 seqs and TTFT collapses past ~c56.
                 - --max-num-seqs=128
                 - --max-num-batched-tokens=16384
                 - --speculative-config=$(SPECULATIVE_CONFIG)

@@ -131,14 +131,16 @@ errored, and unfinished requests before reporting aggregate throughput.
 
 ## A note on speculative decoding (MTP)
 
-Neither profile ships MTP — it is incompatible with disaggregation on this arch
-and offers no gain on aggregation (see the recipe [README](../README.md)
-Limitations, and vLLM [#38898](https://github.com/vllm-project/vllm/issues/38898)).
-Do **not** reintroduce a synthetic `rejection_sample_method: synthetic` block to
-"benchmark" it: a forced-acceptance sweep skips the conv-state copy path that
-crashes on real traffic, so it reports throughput for a configuration that cannot
-actually serve. Validate any spec-decode change against this real trace, not a
-synthetic sweep.
+The aggregated profile ships MTP; the disaggregated profile does not, because NIXL's
+conv-state transfer needs `VLLM_SSM_CONV_STATE_LAYOUT=DS` and MTP + prefix caching
+cannot use that layout (see the recipe [README](../README.md) Limitations, and vLLM
+[#38898](https://github.com/vllm-project/vllm/issues/38898)).
+
+Benchmark aggregated with the `speculative-config-synthetic` ConfigMap key, which
+forces the measured acceptance length of 3.120. The mooncake trace synthesises prompts
+from `hash_ids`, so real MTP predicts them far more easily than real text and reports
+an inflated 3.325. Ship the `speculative-config` key; it is what accuracy was validated
+against.
 
 ## Tunable environment variables
 
