@@ -52,7 +52,9 @@ spec:
           - {name: model-cache,   mountPath: /model-cache}
         volumes:
         - name: model-cache
-          persistentVolumeClaim: {claimName: model-cache}
+          hostPath:
+            path: /mnt/stateful_partition/kube-ephemeral-ssd/models/oakhaven-max-final-fp8_vv3
+            type: Directory
 
   - name: VllmDecodeWorker
     type: decode
@@ -159,7 +161,9 @@ spec:
           - {name: compile-cache,  mountPath: /cache-persist}
         volumes:
         - name: model-cache
-          persistentVolumeClaim: {claimName: model-cache}
+          hostPath:
+            path: /mnt/stateful_partition/kube-ephemeral-ssd/models/oakhaven-max-final-fp8_vv3
+            type: Directory
         - name: compile-cache
           hostPath:
             path: /mnt/stateful_partition/kube-ephemeral-ssd/cache/qwen38max-agg
