@@ -33,8 +33,10 @@ spec:
       spec:
         nodeSelector:
           nvidia.com/gpu.product: NVIDIA-GB200
+          cloud.google.com/gke-nodepool: customer-gpu-w0e
         tolerations:
         - {key: kubernetes.io/arch, operator: Equal, value: arm64,         effect: NoSchedule}
+        - {key: dedicated,          operator: Equal, value: GoldenPrairie, effect: NoSchedule}
         containers:
         - name: main
           image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.0-qwen-3.8-2.4t-dev.1
@@ -68,8 +70,10 @@ spec:
       spec:
         nodeSelector:
           nvidia.com/gpu.product: NVIDIA-GB200
+          cloud.google.com/gke-nodepool: customer-gpu-w0e
         tolerations:
         - {key: kubernetes.io/arch, operator: Equal, value: arm64,         effect: NoSchedule}
+        - {key: dedicated,          operator: Equal, value: GoldenPrairie, effect: NoSchedule}
         resourceClaims:
         - name: compute-domain-channel
           resourceClaimTemplateName: qwen38max-agg-cd-channel
