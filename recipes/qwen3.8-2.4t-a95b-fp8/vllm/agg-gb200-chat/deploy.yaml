@@ -81,7 +81,7 @@ spec:
           args:
           - |
             exec python3 -m dynamo.vllm \
-              --model Qwen/Qwen3.8-2.4T-A95B-FP8 \
+              --model /model-cache \
               --hf-overrides '{"architectures":["Qwen3_5MoeForCausalLM"]}' \
               --served-model-name Qwen/Qwen3.8-2.4T-A95B-FP8 \
               --trust-remote-code \
