@@ -63,7 +63,7 @@ vllm:
     base_image: nvcr.io/nvidia/cuda-dl-base
     runtime_image: vllm/vllm-openai
     base_image_tag: 25.11-cuda13.0-devel-ubuntu24.04
-    runtime_image_tag: v0.27.1-ubuntu2404
+    runtime_image_tag: "nightly-65b7662d3fcb773afaf751ab29ac6960a0cf011d@sha256:3ae6337cbc8423ce6af3286a38b759df8c218bfdb29e1d0353cabc273a22fb0b"
     # Baseline is vllm-openai's TRUE base, nvidia/cuda:13.0.2-base-ubuntu24.04
     # (Docker Hub), NOT a self-baseline of the third-party vllm/vllm-openai image.
     # vllm-openai is built FROM nvidia/cuda, so this attributes everything vLLM
@@ -71,6 +71,9 @@ vllm:
     # rather than hiding it. Per-arch stem; the licenses stage appends
     # -${TARGETARCH}.cdx.json. (GPL media codecs from vllm-openai are purged in
     # the runtime image — see the codec-purge follow-up.)
+    # NOTE: pinned to nightly-65b7662 (vLLM 0.26.1rc1.dev602) — this is the
+    # earliest nightly that ships the TrtLLM SITU+MxE2m1+TileSize=32 cubin
+    # required for Kimi-K3 MXFP4 MoE. The 0.27.1 release does not include it.
     baseline_sbom: cuda@2ab6381d
   xpu:
     base_image: public.ecr.aws/q9t5s3a7/vllm-ci-test-repo
