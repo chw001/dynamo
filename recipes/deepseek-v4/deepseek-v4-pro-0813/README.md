@@ -17,16 +17,16 @@ Dynamo + vLLM deployment profiles.
 
 |                          | H200 aggregated agentic | H200 disaggregated agentic       | H200 aggregated 1M       | H200 disaggregated 1M            | GB200 aggregated       | GB200 disaggregated |
 | ------------------------ | ----------------------- | -------------------------------- | ------------------------ | -------------------------------- | ---------------------- | ------------------- |
-| **GPU** (per worker)     | 8x H200                 | 8x H200 prefill + 8x H200 decode | 8x H200                  | 8x H200 prefill + 8x H200 decode | 8x GB200 (2 nodes)     | TBD                 |
-| **Mode**                 | Aggregated              | Prefill/decode disaggregated     | Aggregated               | Prefill/decode disaggregated     | Aggregated             | TBD                 |
-| **Framework**            | vLLM                    | vLLM                             | vLLM                     | vLLM                             | vLLM                   | TBD                 |
-| **Precision**            | MXFP4 experts + FP8 KV  | MXFP4 experts + FP8 KV           | MXFP4 experts + FP8 KV   | MXFP4 experts + FP8 KV           | MXFP4 experts + FP8 KV | TBD                 |
-| **Parallelism**          | TP8/EP8                 | TP8/EP8 prefill / TP8/EP8 decode | TP8/EP8                  | TP8/EP8 prefill / TP8/EP8 decode | TP8/EP8                | TBD                 |
-| **Routing**              | KV-aware                | KV-aware                         | KV-aware                 | KV-aware                         | KV-aware               | TBD                 |
-| **Speculative decoding** | None                    | None                             | None                     | None                             | DSpark k=5             | TBD                 |
-| **Context length**       | 86,016                  | 86,016                           | 1,048,576                | 1,048,576                        | 1,048,576              | TBD                 |
-| **KV cache offloading**  | None                    | None                             | `SimpleCPUOffload` (CPU) | `SimpleCPUOffload` (CPU, decode) | None                   | TBD                 |
-| **KV transfer**          | N/A                     | NIXL                             | N/A                      | NIXL (via `MultiConnector`)      | N/A                    | TBD                 |
+| **GPU** (per worker)     | 8x H200                 | 8x H200 prefill + 8x H200 decode | 8x H200                  | 8x H200 prefill + 8x H200 decode | 8x GB200 (2 nodes)     | 8x GB200 prefill + 8x GB200 decode (2 nodes each) |
+| **Mode**                 | Aggregated              | Prefill/decode disaggregated     | Aggregated               | Prefill/decode disaggregated     | Aggregated             | Prefill/decode disaggregated |
+| **Framework**            | vLLM                    | vLLM                             | vLLM                     | vLLM                             | vLLM                   | vLLM |
+| **Precision**            | MXFP4 experts + FP8 KV  | MXFP4 experts + FP8 KV           | MXFP4 experts + FP8 KV   | MXFP4 experts + FP8 KV           | MXFP4 experts + FP8 KV | MXFP4 experts + FP8 KV |
+| **Parallelism**          | TP8/EP8                 | TP8/EP8 prefill / TP8/EP8 decode | TP8/EP8                  | TP8/EP8 prefill / TP8/EP8 decode | TP8/EP8                | TP8/EP8 prefill / TP8/EP8 decode |
+| **Routing**              | KV-aware                | KV-aware                         | KV-aware                 | KV-aware                         | KV-aware               | KV-aware |
+| **Speculative decoding** | None                    | None                             | None                     | None                             | DSpark k=5             | DSpark k=5 (decode only) |
+| **Context length**       | 86,016                  | 86,016                           | 1,048,576                | 1,048,576                        | 1,048,576              | 1,048,576 |
+| **KV cache offloading**  | None                    | None                             | `SimpleCPUOffload` (CPU) | `SimpleCPUOffload` (CPU, decode) | None                   | None |
+| **KV transfer**          | N/A                     | NIXL                             | N/A                      | NIXL (via `MultiConnector`)      | N/A                    | NIXL |
 
 ## Supported features
 
@@ -74,7 +74,7 @@ kubectl wait --for=condition=Complete job/model-download -n ${NAMESPACE} --timeo
 
 ```bash
 MODE=agg         # or disagg
-SKU=h200         # or gb200 (aggregated agentic only)
+SKU=h200         # or gb200
 WORKLOAD=agentic # or 1m
 kubectl apply -f vllm/${MODE}-${SKU}-${WORKLOAD}/deploy.yaml -n ${NAMESPACE}
 ```
