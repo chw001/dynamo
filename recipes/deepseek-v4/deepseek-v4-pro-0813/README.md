@@ -13,7 +13,7 @@ Recipes for [DeepSeek-V4-Pro-0813](https://huggingface.co/deepseek-ai/DeepSeek-V
 
 ## Configurations
 
-Dynamo + vLLM deployment profiles. The GB200 disaggregated profile is not published yet.
+Dynamo + vLLM deployment profiles.
 
 |                          | H200 aggregated agentic | H200 disaggregated agentic       | H200 aggregated 1M       | H200 disaggregated 1M            | GB200 aggregated       | GB200 disaggregated |
 | ------------------------ | ----------------------- | -------------------------------- | ------------------------ | -------------------------------- | ---------------------- | ------------------- |
@@ -101,3 +101,4 @@ offloading, see [perf/README.md](perf/README.md) for details.
 | Workload | Recipe | SKU | Concurrency | System output tok/s/gpu | User output tok/s (P50) | TTFT P50 (ms) |
 | -------- | ------ | --- | ----------- | ----------------------- | ----------------------- | ------------- |
 | Agentic 64K | `agg-gb200-agentic` | 8x GB200 | 8 | 64.88 | 55.906 | 383.3 |
+| Agentic 64K | `disagg-gb200-agentic` | 16x GB200 | 12 | 50.31 | 50.042 | 2370.3 |
