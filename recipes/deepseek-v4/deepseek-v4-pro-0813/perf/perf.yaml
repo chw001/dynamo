@@ -41,7 +41,7 @@ spec:
                 # with the target frontend. Change this together with ENDPOINT when you
                 # switch variants (one of:
                 # dsv4-pro-0813-{agg,disagg}-h200-{agentic,1m},
-                # dsv4-pro-0813-agg-gb200-agentic).
+                # dsv4-pro-0813-{agg,disagg}-gb200-agentic).
                 - dsv4-pro-0813-agg-h200-agentic
             topologyKey: kubernetes.io/hostname
       containers:

@@ -8,10 +8,6 @@
 # GB200 is 4 GPUs per node, so each TP8 worker spans two nodes:
 # `multinode.nodeCount: 2`. Both workers share one ComputeDomain.
 #
-# On the 64K-ISL / 400-OSL / 90%-KV-reuse agentic trace the aggregated recipe wins
-# on tok/s/GPU. Ship this when prefill and decode need to scale independently, or
-# when prefill traffic is bursty; see ../agg-gb200-agentic/deploy.yaml otherwise.
-#
 # KV moves between workers over NIXL. On this cluster that path must be RDMA --
 # over TCP, P50 TTFT was 4663 ms against 479 ms on RDMA, an order of magnitude.
 # The `networking.gke.io.*` annotations and resources below are GKE-specific;
