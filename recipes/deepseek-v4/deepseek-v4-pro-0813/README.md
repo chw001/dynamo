@@ -106,6 +106,3 @@ offloading, see [perf/README.md](perf/README.md) for details.
 Both GB200 rows were measured on the same 3,541-row 15% agentic trace, each at its own
 iso-SLA operating point against the joint gate of >= 50 tok/s/user and TTFT p50 < 5 s.
 
-## Accuracy results
-
-GPQA-diamond runs for the GB200 profiles are in progress; results will follow.
