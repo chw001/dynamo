@@ -16,20 +16,20 @@
 apiVersion: resource.nvidia.com/v1beta1
 kind: ComputeDomain
 metadata:
-  name: dsv4-pro-0813-disagg-gb200-agentic-compute-domain
+  name: dsv4-0813-disagg-gb200-agentic-compute-domain
 spec:
   # 0 = on-demand allocation; nodes are assigned when pods request them via resourceClaims.
   numNodes: 0
   channel:
     resourceClaimTemplate:
-      name: dsv4-pro-0813-disagg-gb200-agentic-compute-domain-channel
+      name: dsv4-0813-disagg-gb200-agentic-compute-domain-channel
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dsv4-pro-0813-disagg-gb200-agentic-config
+  name: dsv4-0813-disagg-gb200-agentic-config
   labels:
-    app.kubernetes.io/name: dsv4-pro-0813-disagg-gb200-agentic
+    app.kubernetes.io/name: dsv4-0813-disagg-gb200-agentic
 data:
   # Production: real rejection sampling, distribution-preserving.
   speculative-config: |
@@ -41,7 +41,7 @@ data:
 apiVersion: nvidia.com/v1beta1
 kind: DynamoGraphDeployment
 metadata:
-  name: dsv4-pro-0813-disagg-gb200-agentic
+  name: dsv4-0813-disagg-gb200-agentic
 spec:
   backendFramework: vllm
   components:
@@ -75,7 +75,7 @@ spec:
                     --trust-remote-code \
                     --http-host 0.0.0.0 \
                     --http-port 8000
-    - name: VllmPrefillWorker
+    - name: VllmPrefill
       type: prefill
       replicas: 1
       multinode:
@@ -103,7 +103,7 @@ spec:
               effect: NoSchedule
           resourceClaims:
             - name: compute-domain-channel
-              resourceClaimTemplateName: dsv4-pro-0813-disagg-gb200-agentic-compute-domain-channel
+              resourceClaimTemplateName: dsv4-0813-disagg-gb200-agentic-compute-domain-channel
           volumes:
             - name: model-cache
               persistentVolumeClaim:
@@ -228,7 +228,7 @@ spec:
                   networking.gke.io.networks/rdma-2.IP: "1"
                   networking.gke.io.networks/rdma-3: "1"
                   networking.gke.io.networks/rdma-3.IP: "1"
-    - name: VllmDecodeWorker
+    - name: VllmDecode
       type: decode
       replicas: 1
       multinode:
@@ -255,7 +255,7 @@ spec:
               effect: NoSchedule
           resourceClaims:
             - name: compute-domain-channel
-              resourceClaimTemplateName: dsv4-pro-0813-disagg-gb200-agentic-compute-domain-channel
+              resourceClaimTemplateName: dsv4-0813-disagg-gb200-agentic-compute-domain-channel
           volumes:
             - name: model-cache
               persistentVolumeClaim:
@@ -322,7 +322,7 @@ spec:
                 - name: SPECULATIVE_CONFIG
                   valueFrom:
                     configMapKeyRef:
-                      name: dsv4-pro-0813-disagg-gb200-agentic-config
+                      name: dsv4-0813-disagg-gb200-agentic-config
                       # Swap to `speculative-config-synthetic` for benchmarking only.
                       key: speculative-config
               startupProbe:
