@@ -102,3 +102,10 @@ offloading, see [perf/README.md](perf/README.md) for details.
 | -------- | ------ | --- | ----------- | ----------------------- | ----------------------- | ------------- |
 | Agentic 64K | `agg-gb200-agentic` | 8x GB200 | 8 | 64.88 | 55.906 | 383.3 |
 | Agentic 64K | `disagg-gb200-agentic` | 16x GB200 | 12 | 50.31 | 50.042 | 2370.3 |
+
+Both GB200 rows were measured on the same 3,541-row 15% agentic trace, each at its own
+iso-SLA operating point against the joint gate of >= 50 tok/s/user and TTFT p50 < 5 s.
+
+## Accuracy results
+
+GPQA-diamond runs for the GB200 profiles are in progress; results will follow.
