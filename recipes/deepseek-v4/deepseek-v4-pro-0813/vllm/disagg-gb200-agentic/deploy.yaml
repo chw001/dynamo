@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
-# DeepSeek-V4-Pro-0813 (native FP8) — disaggregated GB200, 1P1D. Each worker is
+# DeepSeek-V4-Pro-0813 (MXFP4 experts + FP8 KV) — disaggregated GB200, 1P1D. Each worker is
 # TP8 + expert parallelism, 1M context; the decode worker adds DSpark speculative
 # decoding. Total 16 GPUs = 4 nodes.
 #
