@@ -34,7 +34,7 @@ This recipe serves `LGAI-EXAONE/K-EXAONE-2.0-750B-A37B-NVFP4` — a 764.5B-param
 <span><b>GPUs</b> 8x B200, 4 prefill + 4 decode</span>
 <span><b>Parallelism</b> TP4 prefill, TP4 decode</span>
 <span><b>KV transfer</b> NIXL over UCX, InfiniBand RDMA</span>
-<span><b>Workload</b> 8K ISL / 1K OSL chat trace, ~70% prefix reuse</span>
+<span><b>Workload</b> 8K ISL / 1K OSL chat trace, ~70% design reuse (~8.8% achieved)</span>
 </div>
 </div>
 
@@ -126,7 +126,7 @@ This is a reasoning model. Use temperature 0.6 rather than greedy decoding, give
 kubectl apply -f recipes/k-exaone-2.0/perf/perf.yaml -n ${NAMESPACE}
 ```
 
-Trace replay with AIPerf against the Mooncake 8K/1K/70%-reuse chat trace. See [`perf/README.md`](https://github.com/ai-dynamo/dynamo/blob/main/recipes/k-exaone-2.0/perf/README.md) for staging the trace, running a concurrency sweep, and fetching artifacts.
+Trace replay with AIPerf against the Mooncake 8K/1K chat trace (designed for ~70% prefix reuse; ~8.8% achieved on this topology). See [`perf/README.md`](https://github.com/ai-dynamo/dynamo/blob/main/recipes/k-exaone-2.0/perf/README.md) for staging the trace, running a concurrency sweep, and fetching artifacts.
 
 ## Expected Performance
 
